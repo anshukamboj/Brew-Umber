@@ -33,7 +33,7 @@ To run this project locally, follow these steps:
 
 ### 1. Clone the Repository
 ```bash
-git clone <`https://github.com/anshukamboj/Brew-Umber`>
+git clone `https://github.com/anshukamboj/Brew-Umber`
 cd <Brew-Umber>
 ```
 
