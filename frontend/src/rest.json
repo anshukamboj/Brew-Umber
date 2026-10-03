@@ -1,0 +1,47 @@
+{
+  "pageTitle": "About Us | Artisan Roasters",
+  "heroSection": {
+    "headline": "Brewing Community ,One Cup at a Time. ",
+    "subHeadline": "We are a fiercely independent coffee roastery dedicated to ethical sourcing and the perfect roast.",
+    "heroBackgroundImage": "https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=2000&auto=format&fit=crop"
+  },
+  "ourStorySection": {
+    "heading": "Our Story",
+    "paragraphs": [
+      "Founded in 2018 in a small garage with a 1kg roaster, Artisan Roasters was born out of a simple frustration: it was too hard to find coffee that tasted great and treated farmers fairly.",
+      "Today, we operate a zero-waste roastery and three cafes across the city. We travel the globe to build direct relationships with the families who grow our beans, paying well above fair-trade minimums to ensure sustainable livelihoods."
+    ],
+    "storySideImage": "https://images.unsplash.com/photo-1611162458324-aae1eb4129a4?q=80&w=800&auto=format&fit=crop"
+  },
+  "statsSection": [
+    { "id": 1, "number": "15+", "label": "Partner Farms Worldwide" },
+    { "id": 2, "number": "Zero", "label": "Waste to Landfill" },
+    { "id": 3, "number": "4.9", "label": "Average Customer Rating" }
+  ],
+  "valuesSection": {
+    "heading": "What Drives Us",
+    "values": [
+      {
+        "id": "v1",
+        "icon": "🌱",
+        "title": "Sustainable Sourcing",
+        "description": "We only partner with farms that practice shade-grown, regenerative agriculture to protect local ecosystems."
+      },
+      {
+        "id": "v2",
+        "icon": "🔥",
+        "title": "Small Batch Roasting",
+        "description": "Every bean is roasted to order in small batches, ensuring you get the freshest cup possible."
+      },
+      {
+        "id": "v3",
+        "icon": "🤝",
+        "title": "Community First",
+        "description": "From our farmers to our baristas to you, we believe coffee is a bridge that brings people together."
+      }
+    ]
+  }
+ 
+    
+  
+}
