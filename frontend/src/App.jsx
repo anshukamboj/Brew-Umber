@@ -7,7 +7,6 @@ import Contact from './component/Contact'
 import Npage from './component/Npage'
 import Checkout from './component/Checkout';
 
-
 const App = () => {
   return (
     <BrowserRouter>

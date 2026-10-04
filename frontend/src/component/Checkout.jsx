@@ -25,7 +25,6 @@ const Checkout = () => {
     pinCode: '',
   })
 
-  // Payment details
   const [paymentDetails, setPaymentDetails] = useState({
     cardNumber: '',
     expiry: '',
@@ -51,7 +50,7 @@ const Checkout = () => {
     (sum, item) =>
       sum +
       Number(item.price || 0) *
-        Number(item.quantity || 0),
+      Number(item.quantity || 0),
     0
   )
   const tax = subtotal * 0.05
@@ -74,11 +73,6 @@ const Checkout = () => {
     setError('')
   }
 
-
-  // =========================================================
-  // PAYMENT INPUT
-  // =========================================================
-
   const handlePaymentChange = (e) => {
     const { name, value } = e.target
 
@@ -95,12 +89,6 @@ const Checkout = () => {
     setTableNumber('')
     setError('')
   }
-
-
-  // =========================================================
-  // VALIDATE CUSTOMER
-  // =========================================================
-
   const validateCustomerDetails = () => {
 
     if (!orderType) {
@@ -138,7 +126,6 @@ const Checkout = () => {
       return false
     }
 
-    // Address required only for home delivery
     if (orderType === 'home') {
 
       if (!customer.address.trim()) {
@@ -166,14 +153,8 @@ const Checkout = () => {
     return true
   }
 
-
-  // =========================================================
-  // SUBMIT PAYMENT
-  // =========================================================
-
   const handlePaymentSubmit = async () => {
 
-    // Store requires table number
     if (
       orderType === 'store' &&
       !tableNumber.trim()
@@ -212,7 +193,6 @@ const Checkout = () => {
       }
     }
 
-
     try {
 
       setError('')
@@ -226,22 +206,17 @@ const Checkout = () => {
           phone: customer.phone,
         },
 
-
         orderType,
 
-
-        // Address only for home
         address:
           orderType === 'home'
             ? {
-                address: customer.address,
-                city: customer.city,
-                pinCode: customer.pinCode,
-              }
+              address: customer.address,
+              city: customer.city,
+              pinCode: customer.pinCode,
+            }
             : null,
 
-
-        // Table only for store
         tableNumber:
           orderType === 'store'
             ? tableNumber
@@ -249,33 +224,15 @@ const Checkout = () => {
 
         items: cart.map((item) => ({
           title: item.title,
-
           price: Number(item.price),
-
           quantity: Number(item.quantity),
-
           image: item.image,
         })),
-
-
         subtotal: Number(subtotal),
-
         tax: Number(tax),
-
-        // ⭐ THIS IS THE DELIVERY AMOUNT SENT TO BACKEND
         delivery: Number(delivery),
-
-        // ⭐ FINAL TOTAL
         total: Number(total),
-
-
-        // ===================================================
-        // PAYMENT
-        // ===================================================
-
         paymentMethod,
-
-
         paymentStatus:
           paymentMethod === 'cash'
             ? 'pending'
@@ -291,13 +248,8 @@ const Checkout = () => {
         orderData
       )
 
-
-      // =====================================================
-      // SEND ORDER TO BACKEND
-      // =====================================================
-
       const response = await fetch(
-        'http://localhost:5000/api/orders',
+        'https://brew-umber.onrender.com/',
         {
           method: 'POST',
 
@@ -316,7 +268,7 @@ const Checkout = () => {
       if (!response.ok) {
         throw new Error(
           data.message ||
-            'Failed to place order'
+          'Failed to place order'
         )
       }
 
@@ -338,23 +290,15 @@ const Checkout = () => {
 
       setError(
         error.message ||
-          'Something went wrong while placing your order.'
+        'Something went wrong while placing your order.'
       )
     }
   }
-
-
-  // =========================================================
-  // UI
-  // =========================================================
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-12">
 
       <div className="w-11/12 max-w-6xl mx-auto">
-
-        {/* HEADER */}
-
         <div className="mb-10">
 
           <Link
@@ -363,75 +307,44 @@ const Checkout = () => {
           >
 
             <i className="ri-arrow-left-line"></i>
-
             Back to Menu
-
           </Link>
-
-
           <h1 className="text-5xl font-serif font-bold text-amber-950 mt-6">
             CHECKOUT
           </h1>
-
-
           <p className="text-gray-500 mt-2">
             Complete your order and enjoy your perfect cup.
           </p>
-
         </div>
-
-
-        {/* MAIN GRID */}
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-
-          {/* =================================================
-              LEFT SIDE
-          ================================================= */}
-
           <div className="lg:col-span-2">
-
-
-            {/* ORDER TYPE */}
-
             <div className="bg-[#2c2d31] rounded-2xl p-8 text-white shadow-xl mb-8">
 
               <h2 className="text-2xl font-serif font-bold mb-2">
                 Where would you like your order?
               </h2>
-
-
               <p className="text-gray-400 mb-6">
                 Choose how you want to receive your order.
               </p>
-
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-
-                {/* STORE */}
-
                 <button
                   type="button"
                   onClick={() =>
                     handleOrderType('store')
                   }
-                  className={`text-left p-6 rounded-xl border-2 transition ${
-                    orderType === 'store'
-                      ? 'border-orange-400 bg-orange-400 text-black'
-                      : 'border-gray-600 bg-[#38393e] hover:border-orange-400'
-                  }`}
+                  className={`text-left p-6 rounded-xl border-2 transition ${orderType === 'store'
+                    ? 'border-orange-400 bg-orange-400 text-black'
+                    : 'border-gray-600 bg-[#38393e] hover:border-orange-400'
+                    }`}
                 >
 
                   <div className="flex items-center gap-4">
 
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        orderType === 'store'
-                          ? 'bg-black text-orange-400'
-                          : 'bg-orange-400 text-black'
-                      }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center ${orderType === 'store'
+                        ? 'bg-black text-orange-400'
+                        : 'bg-orange-400 text-black'
+                        }`}
                     >
 
                       <i className="ri-store-2-line text-2xl"></i>
@@ -446,11 +359,10 @@ const Checkout = () => {
                       </h3>
 
                       <p
-                        className={`text-sm mt-1 ${
-                          orderType === 'store'
-                            ? 'text-black/70'
-                            : 'text-gray-400'
-                        }`}
+                        className={`text-sm mt-1 ${orderType === 'store'
+                          ? 'text-black/70'
+                          : 'text-gray-400'
+                          }`}
                       >
                         Pick up your order at the store
                       </p>
@@ -461,36 +373,28 @@ const Checkout = () => {
 
                 </button>
 
-
-                {/* HOME */}
-
                 <button
                   type="button"
                   onClick={() =>
                     handleOrderType('home')
                   }
-                  className={`text-left p-6 rounded-xl border-2 transition ${
-                    orderType === 'home'
-                      ? 'border-orange-400 bg-orange-400 text-black'
-                      : 'border-gray-600 bg-[#38393e] hover:border-orange-400'
-                  }`}
+                  className={`text-left p-6 rounded-xl border-2 transition ${orderType === 'home'
+                    ? 'border-orange-400 bg-orange-400 text-black'
+                    : 'border-gray-600 bg-[#38393e] hover:border-orange-400'
+                    }`}
                 >
 
                   <div className="flex items-center gap-4">
 
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        orderType === 'home'
-                          ? 'bg-black text-orange-400'
-                          : 'bg-orange-400 text-black'
-                      }`}
+                      className={`w-12 h-12 rounded-full flex items-center justify-center ${orderType === 'home'
+                        ? 'bg-black text-orange-400'
+                        : 'bg-orange-400 text-black'
+                        }`}
                     >
 
                       <i className="ri-home-4-line text-2xl"></i>
-
                     </div>
-
-
                     <div>
 
                       <h3 className="text-xl font-bold">
@@ -498,11 +402,10 @@ const Checkout = () => {
                       </h3>
 
                       <p
-                        className={`text-sm mt-1 ${
-                          orderType === 'home'
-                            ? 'text-black/70'
-                            : 'text-gray-400'
-                        }`}
+                        className={`text-sm mt-1 ${orderType === 'home'
+                          ? 'text-black/70'
+                          : 'text-gray-400'
+                          }`}
                       >
                         Get your order delivered to your home
                       </p>
@@ -517,18 +420,11 @@ const Checkout = () => {
 
             </div>
 
-
-            {/* CUSTOMER DETAILS */}
-
             <div className="bg-[#2c2d31] rounded-2xl p-8 text-white shadow-xl">
 
               <h2 className="text-2xl font-serif font-bold mb-6">
                 Customer Details
               </h2>
-
-
-              {/* NAME */}
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                 <div>
@@ -545,10 +441,7 @@ const Checkout = () => {
                     placeholder="Your first name"
                     className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                   />
-
                 </div>
-
-
                 <div>
 
                   <label className="block text-sm text-gray-300 mb-2">
@@ -563,14 +456,8 @@ const Checkout = () => {
                     placeholder="Your last name"
                     className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                   />
-
                 </div>
-
               </div>
-
-
-              {/* EMAIL */}
-
               <div className="mt-5">
 
                 <label className="block text-sm text-gray-300 mb-2">
@@ -585,12 +472,7 @@ const Checkout = () => {
                   placeholder="you@example.com"
                   className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                 />
-
               </div>
-
-
-              {/* PHONE */}
-
               <div className="mt-5">
 
                 <label className="block text-sm text-gray-300 mb-2">
@@ -607,20 +489,13 @@ const Checkout = () => {
                 />
 
               </div>
-
-
-              {/* HOME ADDRESS */}
-
               {orderType === 'home' && (
                 <>
 
                   <h2 className="text-2xl font-serif font-bold mt-10 mb-6">
                     Delivery Address
                   </h2>
-
-
                   <div>
-
                     <label className="block text-sm text-gray-300 mb-2">
                       Address *
                     </label>
@@ -633,14 +508,9 @@ const Checkout = () => {
                       placeholder="House no., street, area"
                       className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                     />
-
                   </div>
-
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-
                     <div>
-
                       <label className="block text-sm text-gray-300 mb-2">
                         City *
                       </label>
@@ -653,12 +523,8 @@ const Checkout = () => {
                         placeholder="City"
                         className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                       />
-
                     </div>
-
-
                     <div>
-
                       <label className="block text-sm text-gray-300 mb-2">
                         PIN Code *
                       </label>
@@ -678,10 +544,6 @@ const Checkout = () => {
 
                 </>
               )}
-
-
-              {/* STORE MESSAGE */}
-
               {orderType === 'store' && (
 
                 <div className="mt-10 bg-orange-400/10 border border-orange-400/40 rounded-xl p-5">
@@ -706,12 +568,7 @@ const Checkout = () => {
                   </div>
 
                 </div>
-
               )}
-
-
-              {/* PLACE ORDER */}
-
               {!showPayment && !orderPlaced && (
 
                 <button
@@ -721,33 +578,17 @@ const Checkout = () => {
                 >
 
                   <i className="ri-lock-line mr-2"></i>
-
                   Place Order
-
                 </button>
-
               )}
-
-
-              {/* ERROR */}
-
               {error && !showPayment && (
 
                 <div className="mt-4 bg-red-500/20 border border-red-400 text-red-300 rounded-lg p-4 text-sm">
 
                   <i className="ri-error-warning-line mr-2"></i>
-
                   {error}
-
                 </div>
-
               )}
-
-
-              {/* =================================================
-                  PAYMENT
-              ================================================= */}
-
               {showPayment && !orderPlaced && (
 
                 <div
@@ -758,30 +599,19 @@ const Checkout = () => {
                   <h2 className="text-2xl font-serif font-bold mb-2">
                     Payment Details
                   </h2>
-
-
                   <p className="text-gray-400 mb-6">
                     Select your payment method to complete your order.
                   </p>
-
-
-                  {/* TABLE NUMBER */}
-
                   {orderType === 'store' && (
 
                     <div className="mb-6 bg-[#38393e] rounded-xl p-5">
-
                       <div className="flex items-start gap-3">
-
                         <i className="ri-table-line text-orange-400 text-2xl"></i>
-
-
                         <div className="flex-1">
 
                           <h3 className="font-bold text-lg">
                             Table Number
                           </h3>
-
 
                           <p className="text-gray-400 text-sm mt-1 mb-3">
                             Enter your table number so we can bring your order to you.
@@ -809,32 +639,20 @@ const Checkout = () => {
                           />
 
                         </div>
-
                       </div>
-
                     </div>
-
                   )}
-
-
-                  {/* PAYMENT METHODS */}
-
                   <div className="space-y-3">
-
-
-                    {/* CARD */}
-
                     <button
                       type="button"
                       onClick={() => {
                         setPaymentMethod('card')
                         setError('')
                       }}
-                      className={`w-full flex items-center gap-3 text-left rounded-lg p-4 transition ${
-                        paymentMethod === 'card'
-                          ? 'bg-orange-400 text-black'
-                          : 'bg-white text-black hover:bg-orange-50'
-                      }`}
+                      className={`w-full flex items-center gap-3 text-left rounded-lg p-4 transition ${paymentMethod === 'card'
+                        ? 'bg-orange-400 text-black'
+                        : 'bg-white text-black hover:bg-orange-50'
+                        }`}
                     >
 
                       <i className="ri-bank-card-line text-xl"></i>
@@ -849,21 +667,16 @@ const Checkout = () => {
                       )}
 
                     </button>
-
-
-                    {/* UPI */}
-
                     <button
                       type="button"
                       onClick={() => {
                         setPaymentMethod('upi')
                         setError('')
                       }}
-                      className={`w-full flex items-center gap-3 text-left rounded-lg p-4 transition ${
-                        paymentMethod === 'upi'
-                          ? 'bg-orange-400 text-black'
-                          : 'bg-white text-black hover:bg-orange-50'
-                      }`}
+                      className={`w-full flex items-center gap-3 text-left rounded-lg p-4 transition ${paymentMethod === 'upi'
+                        ? 'bg-orange-400 text-black'
+                        : 'bg-white text-black hover:bg-orange-50'
+                        }`}
                     >
 
                       <i className="ri-smartphone-line text-xl"></i>
@@ -878,52 +691,32 @@ const Checkout = () => {
                       )}
 
                     </button>
-
-
-                    {/* CASH */}
-
                     <button
                       type="button"
                       onClick={() => {
                         setPaymentMethod('cash')
                         setError('')
                       }}
-                      className={`w-full flex items-center gap-3 text-left rounded-lg p-4 transition ${
-                        paymentMethod === 'cash'
-                          ? 'bg-orange-400 text-black'
-                          : 'bg-white text-black hover:bg-orange-50'
-                      }`}
+                      className={`w-full flex items-center gap-3 text-left rounded-lg p-4 transition ${paymentMethod === 'cash'
+                        ? 'bg-orange-400 text-black'
+                        : 'bg-white text-black hover:bg-orange-50'
+                        }`}
                     >
-
                       <i className="ri-money-rupee-circle-line text-xl"></i>
-
                       <span className="font-semibold">
                         Cash on Delivery
                       </span>
-
-
                       {paymentMethod === 'cash' && (
                         <i className="ri-checkbox-circle-fill ml-auto text-xl"></i>
                       )}
-
                     </button>
-
                   </div>
-
-
-                  {/* CARD DETAILS */}
-
                   {paymentMethod === 'card' && (
-
                     <div className="mt-6 bg-[#38393e] rounded-xl p-5">
-
                       <h3 className="font-bold text-lg mb-4">
                         Card Details
                       </h3>
-
-
                       <div>
-
                         <label className="block text-sm text-gray-300 mb-2">
                           Card Number *
                         </label>
@@ -937,12 +730,8 @@ const Checkout = () => {
                           maxLength="19"
                           className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                         />
-
                       </div>
-
-
                       <div className="grid grid-cols-2 gap-4 mt-4">
-
                         <div>
 
                           <label className="block text-sm text-gray-300 mb-2">
@@ -957,16 +746,11 @@ const Checkout = () => {
                             placeholder="MM/YY"
                             className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                           />
-
                         </div>
-
-
                         <div>
-
                           <label className="block text-sm text-gray-300 mb-2">
                             CVV *
                           </label>
-
                           <input
                             type="password"
                             name="cvv"
@@ -976,18 +760,10 @@ const Checkout = () => {
                             maxLength="4"
                             className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                           />
-
                         </div>
-
                       </div>
-
                     </div>
-
                   )}
-
-
-                  {/* UPI */}
-
                   {paymentMethod === 'upi' && (
 
                     <div className="mt-6 bg-[#38393e] rounded-xl p-5">
@@ -996,11 +772,9 @@ const Checkout = () => {
                         UPI Details
                       </h3>
 
-
                       <label className="block text-sm text-gray-300 mb-2">
                         UPI ID *
                       </label>
-
 
                       <input
                         type="text"
@@ -1010,136 +784,76 @@ const Checkout = () => {
                         placeholder="example@upi"
                         className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
                       />
-
-
                       <p className="text-gray-400 text-sm mt-3">
                         Enter your UPI ID to continue.
                       </p>
-
                     </div>
-
                   )}
-
-
-                  {/* CASH */}
-
                   {paymentMethod === 'cash' && (
-
                     <div className="mt-6 bg-[#38393e] rounded-xl p-5">
-
                       <div className="flex items-start gap-3">
-
                         <i className="ri-money-rupee-circle-line text-orange-400 text-2xl"></i>
-
-
                         <div>
-
                           <h3 className="font-bold text-lg">
                             Cash on Delivery
                           </h3>
-
-
                           <p className="text-gray-400 text-sm mt-1">
                             Pay ₹{total.toFixed(2)} in cash when
                             your order is delivered.
                           </p>
 
                         </div>
-
                       </div>
-
                     </div>
-
                   )}
-
-
-                  {/* PAYMENT ERROR */}
-
                   {error && (
-
                     <div className="mt-4 bg-red-500/20 border border-red-400 text-red-300 rounded-lg p-4 text-sm">
-
                       <i className="ri-error-warning-line mr-2"></i>
-
                       {error}
-
                     </div>
-
                   )}
-
-
-                  {/* CONFIRM PAYMENT */}
-
                   <button
                     type="button"
                     onClick={handlePaymentSubmit}
                     disabled={!paymentMethod}
-                    className={`w-full mt-6 py-4 rounded-xl font-bold text-lg transition ${
-                      paymentMethod
-                        ? 'bg-orange-400 text-black hover:bg-orange-500 cursor-pointer'
-                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    }`}
+                    className={`w-full mt-6 py-4 rounded-xl font-bold text-lg transition ${paymentMethod
+                      ? 'bg-orange-400 text-black hover:bg-orange-500 cursor-pointer'
+                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      }`}
                   >
 
                     <i className="ri-check-line mr-2"></i>
-
                     Confirm Payment
-
                   </button>
-
                 </div>
-
               )}
-
-
-              {/* SUCCESS */}
-
               {orderPlaced && (
-
                 <div className="mt-10 bg-green-500/20 border border-green-400 rounded-xl p-6 text-center">
-
                   <i className="ri-checkbox-circle-fill text-green-400 text-5xl"></i>
-
-
                   <h3 className="text-xl font-bold text-green-300 mt-3">
                     Your order will be placed
                   </h3>
 
-
                   <p className="text-gray-300 text-sm mt-2">
                     Thank you for your order.
                   </p>
-
 
                   {orderType === 'store' && (
 
                     <p className="text-gray-300 text-sm mt-1">
                       Table No. {tableNumber}
                     </p>
-
                   )}
-
                 </div>
-
               )}
-
             </div>
-
           </div>
-
-
-          {/* =================================================
-              RIGHT SIDE - ORDER SUMMARY
-          ================================================= */}
-
           <div>
-
             <div className="bg-[#2c2d31] rounded-2xl p-6 text-white shadow-xl sticky top-24">
 
               <h2 className="text-2xl font-serif font-bold border-b border-gray-600 pb-4">
                 Your Order
               </h2>
-
 
               {cart.length === 0 ? (
 
@@ -1150,22 +864,16 @@ const Checkout = () => {
                   <p className="text-gray-400 mt-4">
                     Your cart is empty.
                   </p>
-
-
                   <Link
                     to="/menu"
                     className="inline-block mt-5 bg-orange-400 text-black font-bold px-5 py-3 rounded-lg hover:bg-orange-500 transition"
                   >
                     Browse Menu
                   </Link>
-
                 </div>
-
               ) : (
 
                 <>
-
-                  {/* ORDER TYPE */}
 
                   {orderType && (
 
@@ -1174,57 +882,38 @@ const Checkout = () => {
                       <div className="flex items-center gap-3">
 
                         <i
-                          className={`${
-                            orderType === 'store'
-                              ? 'ri-store-2-line'
-                              : 'ri-home-4-line'
-                          } text-orange-400 text-xl`}
+                          className={`${orderType === 'store'
+                            ? 'ri-store-2-line'
+                            : 'ri-home-4-line'
+                            } text-orange-400 text-xl`}
                         ></i>
-
-
                         <div>
-
                           <p className="text-xs text-gray-400">
                             Order Type
                           </p>
-
-
                           <p className="font-bold">
                             {orderType === 'store'
                               ? 'At Store'
                               : 'At Home'}
                           </p>
-
                         </div>
-
                       </div>
-
-
                       {orderType === 'store' &&
                         tableNumber && (
 
-                        <p className="text-sm text-orange-400 font-semibold mt-3">
-                          Table No. {tableNumber}
-                        </p>
-
-                      )}
-
+                          <p className="text-sm text-orange-400 font-semibold mt-3">
+                            Table No. {tableNumber}
+                          </p>
+                        )}
                     </div>
-
                   )}
-
-
-                  {/* CART ITEMS */}
-
                   <div className="mt-5 space-y-4 max-h-80 overflow-y-auto">
 
                     {cart.map((item) => (
-
                       <div
                         key={item.title}
                         className="flex gap-3 border-b border-gray-700 pb-4"
                       >
-
                         <img
                           src={
                             item.image ||
@@ -1237,65 +926,35 @@ const Checkout = () => {
                               'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=200'
                           }}
                         />
-
-
                         <div className="flex-1">
 
                           <h3 className="font-bold">
                             {item.title}
                           </h3>
-
-
                           <p className="text-sm text-gray-400">
                             ₹{item.price} × {item.quantity}
                           </p>
-
                         </div>
-
-
                         <span className="text-orange-400 font-bold">
-
                           ₹
                           {(
                             Number(item.price) *
                             Number(item.quantity)
                           ).toFixed(2)}
-
                         </span>
-
                       </div>
-
                     ))}
-
                   </div>
-
-
-                  {/* =================================================
-                      PRICE DETAILS
-                  ================================================= */}
-
                   <div className="border-t border-gray-600 mt-5 pt-5 space-y-3">
-
-
-                    {/* ITEMS */}
-
                     <div className="flex justify-between text-gray-300">
-
                       <span>
                         Items
                       </span>
-
                       <span>
                         {totalItems}
                       </span>
-
                     </div>
-
-
-                    {/* SUBTOTAL */}
-
                     <div className="flex justify-between text-gray-300">
-
                       <span>
                         Subtotal
                       </span>
@@ -1303,36 +962,20 @@ const Checkout = () => {
                       <span>
                         ₹{subtotal.toFixed(2)}
                       </span>
-
                     </div>
-
-
-                    {/* =================================================
-                        ⭐ DELIVERY
-                    ================================================= */}
-
                     <div className="flex justify-between text-gray-300">
-
                       <span>
                         {orderType === 'store'
                           ? 'Store Pickup'
                           : 'Delivery'}
                       </span>
-
-
                       <span>
 
                         {orderType === 'store'
                           ? '₹0.00'
                           : `₹${delivery.toFixed(2)}`}
-
                       </span>
-
                     </div>
-
-
-                    {/* TAX */}
-
                     <div className="flex justify-between text-gray-300">
 
                       <span>
@@ -1342,81 +985,47 @@ const Checkout = () => {
                       <span>
                         ₹{tax.toFixed(2)}
                       </span>
-
                     </div>
-
-
-                    {/* TOTAL */}
-
                     <div className="border-t border-gray-600 pt-4 flex justify-between text-xl font-bold">
 
                       <span>
                         Total
                       </span>
-
-
                       <span className="text-orange-400">
                         ₹{total.toFixed(2)}
                       </span>
-
                     </div>
-
                   </div>
-
-
                   {!showPayment && !orderPlaced && (
 
                     <p className="text-center text-xs text-gray-500 mt-5">
                       Fill in your details to continue.
                     </p>
-
                   )}
-
-
                   {showPayment && !orderPlaced && (
-
                     <div className="mt-5 text-center">
-
                       <p className="text-orange-400 text-sm font-semibold">
                         Payment details required
                       </p>
-
                     </div>
-
                   )}
-
-
                   {orderPlaced && (
-
                     <div className="mt-5 text-center text-green-400">
-
                       <i className="ri-checkbox-circle-fill text-2xl"></i>
-
                       <p className="font-semibold mt-1">
                         Order ready
                       </p>
-
                     </div>
-
                   )}
-
-
                   <p className="text-center text-xs text-gray-500 mt-4">
                     Your payment information is secure.
                   </p>
-
                 </>
-
               )}
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   )
 }
