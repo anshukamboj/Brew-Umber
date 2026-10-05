@@ -43,6 +43,14 @@ app.post('/api/orders', async (req, res) => {
   } catch (error) {
     console.error(error)
 
+    // Missing/invalid fields -> 400 with a useful message instead of a generic 500
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid order data: ${error.message}`,
+      })
+    }
+
     res.status(500).json({
       success: false,
       message: 'Failed to save order',
@@ -65,3 +73,18 @@ app.get('/api/orders', async (req, res) => {
   }
 })
 
+// Always answer in JSON (never Express's default HTML error page)
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+  })
+})
+
+app.use((err, req, res, next) => {
+  console.error(err)
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Server error',
+  })
+})
