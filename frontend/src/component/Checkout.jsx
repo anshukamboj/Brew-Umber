@@ -3,8 +3,40 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import 'remixicon/fonts/remixicon.css'
 
-// Put your own UPI QR image at public/upi-qr.png (or change this path)
+// Your UPI QR image lives at public/qr.jpeg (change this path to use another file)
 const UPI_QR_IMAGE = '/qr.jpeg'
+
+// Full URL of the backend "create order" route (backend: app.post('/api/orders')).
+// Override with VITE_ORDER_API_URL in frontend/.env (e.g. http://localhost:5000/api/orders for local testing).
+const ORDER_API_URL =
+  import.meta.env.VITE_ORDER_API_URL || 'https://brew-umber.onrender.com/api/orders'
+
+// Safely read a response. If the server sent an HTML page (wrong URL, 404, server
+// waking up or crashing) instead of JSON, throw a readable error instead of letting
+// response.json() crash with "Unexpected token '<'".
+const readJsonResponse = async (response) => {
+  const contentType = response.headers.get('content-type') || ''
+
+  if (!contentType.includes('application/json')) {
+    const preview = (await response.text()).slice(0, 200)
+    console.error('Non-JSON response from order API:', response.status, preview)
+
+    if (response.ok || response.status === 404) {
+      throw new Error(
+        'The order service did not respond correctly. Please contact the store - the order address may be misconfigured.'
+      )
+    }
+    throw new Error(
+      `The order server is not available right now (error ${response.status}). If it was idle, wait a few seconds and try again.`
+    )
+  }
+
+  try {
+    return await response.json()
+  } catch {
+    throw new Error('The order server sent an unreadable response. Please try again.')
+  }
+}
 
 const Checkout = () => {
   const { cart: liveCart, clearCart } = useCart()
@@ -255,12 +287,13 @@ const Checkout = () => {
       )
 
       const response = await fetch(
-        'https://brew-umber.onrender.com/',
+        ORDER_API_URL,
         {
           method: 'POST',
 
           headers: {
             'Content-Type': 'application/json',
+            Accept: 'application/json',
           },
 
           body: JSON.stringify(orderData),
@@ -268,13 +301,13 @@ const Checkout = () => {
       )
 
 
-      const data = await response.json()
+      const data = await readJsonResponse(response)
 
 
       if (!response.ok) {
         throw new Error(
-          data.message ||
-          'Failed to place order'
+          data?.message ||
+          `Failed to place order (error ${response.status})`
         )
       }
 
@@ -297,8 +330,10 @@ const Checkout = () => {
       )
 
       setError(
-        error.message ||
-        'Something went wrong while placing your order.'
+        error instanceof TypeError
+          ? 'Could not reach the order server. Check your internet connection and try again.'
+          : error.message ||
+            'Something went wrong while placing your order.'
       )
     }
   }
@@ -784,7 +819,7 @@ const Checkout = () => {
                             <div className="w-full h-full border-2 border-dashed border-gray-400 rounded-lg flex flex-col items-center justify-center text-gray-500 text-sm p-3">
                               <i className="ri-qr-code-line text-5xl"></i>
                               <p className="mt-2">
-                                Add your QR image at <code>public/upi-qr.png</code>
+                                Add your QR image at <code>public/qr.jpeg</code>
                               </p>
                             </div>
                           ) : (
