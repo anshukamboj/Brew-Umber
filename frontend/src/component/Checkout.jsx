@@ -1,11 +1,16 @@
 import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
 import 'remixicon/fonts/remixicon.css'
 
-const Checkout = () => {
-  const location = useLocation()
+// Put your own UPI QR image at public/upi-qr.png (or change this path)
+const UPI_QR_IMAGE = '/qr.jpeg'
 
-  const cart = location.state?.cart || []
+const Checkout = () => {
+  const { cart: liveCart, clearCart } = useCart()
+
+  const [placedCart, setPlacedCart] = useState(null)
+  const cart = placedCart ?? liveCart
 
   const [orderType, setOrderType] = useState('')
   const [showPayment, setShowPayment] = useState(false)
@@ -29,8 +34,11 @@ const Checkout = () => {
     cardNumber: '',
     expiry: '',
     cvv: '',
-    upiId: '',
   })
+
+  
+  const [upiPaid, setUpiPaid] = useState(false)
+  const [qrFailed, setQrFailed] = useState(false)
 
   const [error, setError] = useState('')
   const DELIVERY_CHARGE = 30
@@ -87,6 +95,7 @@ const Checkout = () => {
     setShowPayment(false)
     setOrderPlaced(false)
     setTableNumber('')
+    setPlacedCart(null)
     setError('')
   }
   const validateCustomerDetails = () => {
@@ -183,14 +192,11 @@ const Checkout = () => {
         return
       }
     }
-    if (paymentMethod === 'upi') {
-
-      if (!paymentDetails.upiId.trim()) {
-        setError(
-          'Please enter your UPI ID.'
-        )
-        return
-      }
+    if (paymentMethod === 'upi' && !upiPaid) {
+      setError(
+        'Please scan the QR code, complete the payment, and tick the confirmation box.'
+      )
+      return
     }
 
     try {
@@ -279,6 +285,8 @@ const Checkout = () => {
       )
 
 
+      setPlacedCart(cart)
+      clearCart()
       setOrderPlaced(true)
 
     } catch (error) {
@@ -299,7 +307,7 @@ const Checkout = () => {
     <div className="min-h-screen bg-white pt-24 pb-12">
 
       <div className="w-11/12 max-w-6xl mx-auto">
-        <div className="mb-10">
+        <div className="mb-6 sm:mb-10">
 
           <Link
             to="/menu"
@@ -309,16 +317,16 @@ const Checkout = () => {
             <i className="ri-arrow-left-line"></i>
             Back to Menu
           </Link>
-          <h1 className="text-5xl font-serif font-bold text-amber-950 mt-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-amber-950 mt-6">
             CHECKOUT
           </h1>
           <p className="text-gray-500 mt-2">
             Complete your order and enjoy your perfect cup.
           </p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-2">
-            <div className="bg-[#2c2d31] rounded-2xl p-8 text-white shadow-xl mb-8">
+            <div className="bg-[#2c2d31] rounded-2xl p-4 sm:p-8 text-white shadow-xl mb-6 sm:mb-8">
 
               <h2 className="text-2xl font-serif font-bold mb-2">
                 Where would you like your order?
@@ -332,7 +340,7 @@ const Checkout = () => {
                   onClick={() =>
                     handleOrderType('store')
                   }
-                  className={`text-left p-6 rounded-xl border-2 transition ${orderType === 'store'
+                  className={`text-left p-4 sm:p-6 rounded-xl border-2 transition ${orderType === 'store'
                     ? 'border-orange-400 bg-orange-400 text-black'
                     : 'border-gray-600 bg-[#38393e] hover:border-orange-400'
                     }`}
@@ -378,7 +386,7 @@ const Checkout = () => {
                   onClick={() =>
                     handleOrderType('home')
                   }
-                  className={`text-left p-6 rounded-xl border-2 transition ${orderType === 'home'
+                  className={`text-left p-4 sm:p-6 rounded-xl border-2 transition ${orderType === 'home'
                     ? 'border-orange-400 bg-orange-400 text-black'
                     : 'border-gray-600 bg-[#38393e] hover:border-orange-400'
                     }`}
@@ -420,7 +428,7 @@ const Checkout = () => {
 
             </div>
 
-            <div className="bg-[#2c2d31] rounded-2xl p-8 text-white shadow-xl">
+            <div className="bg-[#2c2d31] rounded-2xl p-4 sm:p-8 text-white shadow-xl">
 
               <h2 className="text-2xl font-serif font-bold mb-6">
                 Customer Details
@@ -765,28 +773,57 @@ const Checkout = () => {
                     </div>
                   )}
                   {paymentMethod === 'upi' && (
-
-                    <div className="mt-6 bg-[#38393e] rounded-xl p-5">
-
+                    <div className="mt-6 bg-[#38393e] rounded-xl p-4 sm:p-5">
                       <h3 className="font-bold text-lg mb-4">
-                        UPI Details
+                        Pay with UPI
                       </h3>
 
-                      <label className="block text-sm text-gray-300 mb-2">
-                        UPI ID *
-                      </label>
+                      <div className="flex flex-col items-center text-center">
+                        <div className="bg-white p-3 rounded-xl w-full max-w-64 aspect-square flex items-center justify-center">
+                          {qrFailed ? (
+                            <div className="w-full h-full border-2 border-dashed border-gray-400 rounded-lg flex flex-col items-center justify-center text-gray-500 text-sm p-3">
+                              <i className="ri-qr-code-line text-5xl"></i>
+                              <p className="mt-2">
+                                Add your QR image at <code>public/upi-qr.png</code>
+                              </p>
+                            </div>
+                          ) : (
+                            <img
+                              src={UPI_QR_IMAGE}
+                              alt="UPI payment QR code"
+                              onError={() => setQrFailed(true)}
+                              className="w-full h-full object-contain"
+                            />
+                          )}
+                        </div>
 
-                      <input
-                        type="text"
-                        name="upiId"
-                        value={paymentDetails.upiId}
-                        onChange={handlePaymentChange}
-                        placeholder="example@upi"
-                        className="w-full bg-white text-black rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-orange-400"
-                      />
-                      <p className="text-gray-400 text-sm mt-3">
-                        Enter your UPI ID to continue.
-                      </p>
+                        <p className="mt-4 text-sm text-gray-400">Amount to pay</p>
+                        <p className="text-orange-400 font-bold text-2xl">
+                          ₹{total.toFixed(2)}
+                        </p>
+
+                        <ol className="mt-4 w-full text-left text-sm text-gray-300 list-decimal list-inside space-y-1">
+                          <li>Open any UPI app (Google Pay, PhonePe, Paytm, BHIM).</li>
+                          <li>Scan the QR code above.</li>
+                          <li>Enter ₹{total.toFixed(2)} and complete the payment.</li>
+                          <li>Come back here and confirm below.</li>
+                        </ol>
+
+                        <label className="mt-5 w-full flex items-start gap-3 text-left text-sm cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={upiPaid}
+                            onChange={(e) => {
+                              setUpiPaid(e.target.checked)
+                              setError('')
+                            }}
+                            className="mt-0.5 h-5 w-5 shrink-0 accent-orange-400"
+                          />
+                          <span>
+                            I have scanned the QR code and completed the payment of ₹{total.toFixed(2)}.
+                          </span>
+                        </label>
+                      </div>
                     </div>
                   )}
                   {paymentMethod === 'cash' && (
@@ -849,7 +886,7 @@ const Checkout = () => {
             </div>
           </div>
           <div>
-            <div className="bg-[#2c2d31] rounded-2xl p-6 text-white shadow-xl sticky top-24">
+            <div className="bg-[#2c2d31] rounded-2xl p-4 sm:p-6 text-white shadow-xl lg:sticky lg:top-24">
 
               <h2 className="text-2xl font-serif font-bold border-b border-gray-600 pb-4">
                 Your Order
@@ -926,16 +963,16 @@ const Checkout = () => {
                               'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=200'
                           }}
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
 
-                          <h3 className="font-bold">
+                          <h3 className="font-bold break-words">
                             {item.title}
                           </h3>
                           <p className="text-sm text-gray-400">
                             ₹{item.price} × {item.quantity}
                           </p>
                         </div>
-                        <span className="text-orange-400 font-bold">
+                        <span className="text-orange-400 font-bold shrink-0">
                           ₹
                           {(
                             Number(item.price) *
