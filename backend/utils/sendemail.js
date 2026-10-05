@@ -1,7 +1,14 @@
 const nodemailer = require('nodemailer')
 
+
+// ======================================================
+// GMAIL TRANSPORTER
+// ======================================================
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  family: 4, // force IPv4 - some hosts (e.g. Render) have no IPv6 route, which caused ENETUNREACH
+  connectionTimeout: 15000,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
