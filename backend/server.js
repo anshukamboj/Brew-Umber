@@ -1,7 +1,8 @@
+require('dotenv').config()
+
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-require('dotenv').config()
 
 const Order = require('./models/order')
 const sendOrderEmail = require('./utils/sendemail')
@@ -13,16 +14,16 @@ app.use(express.json())
 
 const PORT = process.env.PORT || 5000
 
-mongoose
-  .connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log('MongoDB connected successfully')
+    console.log('MongoDB connected')
+
     app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`)
+      console.log(`Server running on port ${PORT}`)
     })
   })
   .catch((error) => {
-    console.error('MongoDB connection error:', error)
+    console.log('MongoDB error:', error)
   })
 
 app.post('/api/orders', async (req, res) => {
@@ -31,60 +32,39 @@ app.post('/api/orders', async (req, res) => {
 
     const savedOrder = await order.save()
 
-    sendOrderEmail(savedOrder)
-  .then(() => console.log('Confirmation email sent to', savedOrder.customer.email))
-  .catch((err) => console.error('Email error:', err.message))
+console.log('Order saved:', savedOrder._id)
 
-    res.status(201).json({
-      success: true,
-      message: 'Order saved successfully',
-      order: savedOrder,
-    })
+try {
+  await sendOrderEmail(savedOrder)
+  console.log('Order email sent')
+} catch (emailError) {
+  console.error('Email failed:', emailError)
+}
+
+res.status(201).json({
+  success: true,
+  message: 'Order confirmed',
+  order: savedOrder,
+})
   } catch (error) {
-    console.error(error)
-
-    // Missing/invalid fields -> 400 with a useful message instead of a generic 500
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: `Invalid order data: ${error.message}`,
-      })
-    }
+    console.error('Order error:', error)
 
     res.status(500).json({
       success: false,
-      message: 'Failed to save order',
+      message: error.message,
     })
   }
 })
 
-// Get all orders
+
+
 app.get('/api/orders', async (req, res) => {
   try {
-    const orders = await Order.find().sort({
-      createdAt: -1,
-    })
-
+    const orders = await Order.find().sort({ createdAt: -1 })
     res.json(orders)
   } catch (error) {
     res.status(500).json({
-      message: 'Failed to fetch orders',
+      message: 'Failed to get orders',
     })
   }
-})
-
-// Always answer in JSON (never Express's default HTML error page)
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route not found: ${req.method} ${req.originalUrl}`,
-  })
-})
-
-app.use((err, req, res, next) => {
-  console.error(err)
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Server error',
-  })
 })
