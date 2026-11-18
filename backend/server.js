@@ -26,26 +26,38 @@ mongoose.connect(process.env.MONGO_URI)
     console.log('MongoDB error:', error)
   })
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  })
+})
+
+// Create order & trigger confirmation email
 app.post('/api/orders', async (req, res) => {
   try {
     const order = new Order(req.body)
-
     const savedOrder = await order.save()
 
-console.log('Order saved:', savedOrder._id)
+    console.log('Order saved:', savedOrder._id)
 
-try {
-  await sendOrderEmail(savedOrder)
-  console.log('Order email sent')
-} catch (emailError) {
-  console.error('Email failed:', emailError)
-}
+    // Send confirmation email asynchronously without failing the order creation
+    try {
+      const emailResult = await sendOrderEmail(savedOrder)
+      if (emailResult && emailResult.success) {
+        console.log(`Order confirmation email sent to ${savedOrder.customer?.email}`)
+      }
+    } catch (emailError) {
+      console.error('Email notification failed:', emailError.message || emailError)
+    }
 
-res.status(201).json({
-  success: true,
-  message: 'Order confirmed',
-  order: savedOrder,
-})
+    res.status(201).json({
+      success: true,
+      message: 'Order confirmed',
+      order: savedOrder,
+    })
   } catch (error) {
     console.error('Order error:', error)
 
@@ -56,8 +68,7 @@ res.status(201).json({
   }
 })
 
-
-
+// Retrieve order history (descending chronological order)
 app.get('/api/orders', async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 })
@@ -65,6 +76,9 @@ app.get('/api/orders', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: 'Failed to get orders',
+      error: error.message,
     })
   }
 })
+
+module.exports = app
